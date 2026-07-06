@@ -36,10 +36,6 @@ class Puzz {
     this._buildFrame();
     this._buildPieces();
     this._loadScores();
-    if (this._isMobilePlaced()) {
-      this._frameBgEl.classList.add('revealed');
-      setTimeout(() => this._celebrate(true, 0, this.layout.total, 0, {}), 100);
-    }
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') this._closeExpanded();
     });
@@ -331,11 +327,10 @@ class Puzz {
 
       const state = { el: piece, id: lp.id, slotIndex: i, placed: false, labelEl: label };
 
+      this._scatter(piece);
       if (this._isMobilePlaced()) {
-        this._placeInSlot(state);
         piece.addEventListener('click', () => this._flip(piece, state));
       } else {
-        this._scatter(piece);
         this._enableDrag(piece, state);
       }
 
@@ -552,7 +547,7 @@ class Puzz {
 
   _closeExpanded() {
     if (!this._currentExpanded) return;
-    const { el } = this._currentExpanded;
+    const { el, state } = this._currentExpanded;
     this._currentExpanded = null;
 
     if (this._panelEl) {
@@ -568,6 +563,18 @@ class Puzz {
     this._resumeTimer();
     el.style.zIndex = '';
     setTimeout(() => el.classList.remove('flipped'), 50);
+
+    // Mobile tap-to-place: snap unplaced piece to its slot after the flip unflips
+    if (this._isMobilePlaced() && state && !state.placed) {
+      setTimeout(() => {
+        this._placeInSlot(state);
+        if (this.pieces.every(p => p.placed)) {
+          this.pieces.forEach(p => p.labelEl.style.opacity = '0');
+          setTimeout(() => this._frameBgEl.classList.add('revealed'), 200);
+          setTimeout(() => this._celebrate(true, 0, this.layout.total, 0, {}), 400);
+        }
+      }, 520);
+    }
   }
 
   // ── Timer ─────────────────────────────────────────────
@@ -795,7 +802,7 @@ class Puzz {
       p.placed    = false;
       p.el.classList.remove('placed', 'flipped');
       p.labelEl.style.opacity = '1';
-      if (!this._isMobilePlaced()) this._scatter(p.el);
+      this._scatter(p.el);
     });
 
     this.slots.forEach(s => {
@@ -803,11 +810,6 @@ class Puzz {
       if (s.pathEl) s.pathEl.style.opacity = '1';
       else          s.el.classList.remove('occupied');
     });
-
-    if (this._isMobilePlaced()) {
-      this.pieces.forEach(p => this._placeInSlot(p));
-      this._frameBgEl.classList.add('revealed');
-    }
 
     this.timerEl.textContent = '0:00';
     cancelAnimationFrame(this.timerRafId);
