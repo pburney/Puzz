@@ -623,17 +623,29 @@ class Puzz {
   }
 
   _celebrate(isFirst, secondsSaved, n, elapsed, scores) {
-    this._burstEmojis('💜', n, 0);
+    this._celebrationTimeouts = this._celebrationTimeouts || [];
 
-    if (!isFirst && secondsSaved > 0) {
-      const bonusCount = secondsSaved * n;
-      const emojis     = this.config.celebrationEmojis || Puzz.DEFAULT_EMOJIS;
-      this._burstEmojis(null, bonusCount, 80, emojis);
-    }
+    const isBest = !isFirst && secondsSaved > 0;
+    const base   = [...(this.config.celebrationEmojis || Puzz.DEFAULT_EMOJIS)];
+    const pool   = isBest ? [...base, ...Array(base.length).fill('🏆')] : base;
 
-    setTimeout(() => {
+    // 5 escalating waves: more emojis, faster spawn interval each second
+    const waves = [
+      { count: 20, gap: 45 },
+      { count: 25, gap: 35 },
+      { count: 30, gap: 25 },
+      { count: 35, gap: 15 },
+      { count: 40, gap:  8 },
+    ];
+    waves.forEach(({ count, gap }, i) => {
+      const t = setTimeout(() => this._burstEmojis(null, count, gap, pool), i * 1000);
+      this._celebrationTimeouts.push(t);
+    });
+
+    const t = setTimeout(() => {
       this._showCompletionOverlay(this.config.completionMessage || 'Puzzle complete!');
     }, 1500);
+    this._celebrationTimeouts.push(t);
   }
 
   _showCompletionOverlay(message) {
@@ -670,6 +682,17 @@ class Puzz {
     wordWrap.querySelectorAll('.puzz-message-word').forEach((el, i) => {
       setTimeout(() => el.classList.add('visible'), 500 + i * WORD_DELAY);
     });
+
+    this._dismissTimeout = setTimeout(() => {
+      overlay.classList.remove('visible');
+      setTimeout(() => {
+        if (this._completionEl === overlay) {
+          overlay.remove();
+          this._completionEl = null;
+        }
+        this.pieces.forEach(p => { p.labelEl.style.opacity = '1'; });
+      }, 700);
+    }, 5000);
   }
 
   _burstEmojis(fixed, count, delayBetween, pool) {
@@ -706,6 +729,15 @@ class Puzz {
   // ── Reset ─────────────────────────────────────────────
 
   reset() {
+    if (this._celebrationTimeouts) {
+      this._celebrationTimeouts.forEach(t => clearTimeout(t));
+      this._celebrationTimeouts = [];
+    }
+    if (this._dismissTimeout) {
+      clearTimeout(this._dismissTimeout);
+      this._dismissTimeout = null;
+    }
+
     // Close info panel immediately (no transition needed on reset)
     if (this._panelEl) {
       this._panelEl.remove();

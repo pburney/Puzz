@@ -13,8 +13,8 @@ Designed as a generic open-source component: use it as a personal-site conceit, 
 - **3D card flip** + full-height info panel — click any piece to open its description
 - **Markdown descriptions** — `description` fields support headings, bold, italic, lists, and links
 - **Timer** starts on first drag, **pauses** while the info panel is open
-- **Emoji celebration** on completion — beat your fastest time and earn bonus emojis
-- **Word-by-word completion overlay**
+- **Escalating emoji celebration** — 5 waves of emojis, growing in count and speed each second; 🏆 mixed in when you beat your fastest time
+- **Word-by-word completion overlay** — auto-dismisses after 5 seconds; piece labels fade back in so you can keep exploring
 - **Persistent scores** via `localStorage` — tracks fastest time, completion count, history
 - Zero dependencies — vanilla JS + CSS, no build step
 
@@ -254,13 +254,19 @@ Puzz stores scores in `localStorage` under `config.storageKey`:
 }
 ```
 
-On load, fastest time and completion count appear in the HUD. On each completion:
+On load, fastest time and completion count appear in the HUD. On each completion, 5 waves of emojis fire — one per second, each wave larger and faster than the last:
 
-| Scenario | Celebration |
-|---|---|
-| First-ever solve | N 💜 emojis (N = piece count) |
-| Faster than fastest time | N 💜 + `(secondsSaved × N)` random emojis from `celebrationEmojis` |
-| Slower than fastest | N 💜 + "So close!" message |
+| Wave | Emojis | Spawn gap |
+|---|---|---|
+| 1 | 20 | 45 ms |
+| 2 | 25 | 35 ms |
+| 3 | 30 | 25 ms |
+| 4 | 35 | 15 ms |
+| 5 | 40 | 8 ms |
+
+If you beat your previous fastest time, 🏆 is mixed into the emoji pool at roughly 50/50 with the `celebrationEmojis` list. Customize the base pool via `config.celebrationEmojis`.
+
+The completion message overlay appears after 1.5 seconds and fades out after 5 seconds, leaving the completed puzzle visible and fully interactive — click any piece to read its description.
 
 ---
 
