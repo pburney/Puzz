@@ -36,6 +36,10 @@ class Puzz {
     this._buildFrame();
     this._buildPieces();
     this._loadScores();
+    if (this._isMobilePlaced()) {
+      this._frameBgEl.classList.add('revealed');
+      setTimeout(() => this._celebrate(true, 0, this.layout.total, 0, {}), 100);
+    }
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') this._closeExpanded();
     });
@@ -327,8 +331,13 @@ class Puzz {
 
       const state = { el: piece, id: lp.id, slotIndex: i, placed: false, labelEl: label };
 
-      this._scatter(piece);
-      this._enableDrag(piece, state);
+      if (this._isMobilePlaced()) {
+        this._placeInSlot(state);
+        piece.addEventListener('click', () => this._flip(piece, state));
+      } else {
+        this._scatter(piece);
+        this._enableDrag(piece, state);
+      }
 
       return state;
     });
@@ -360,6 +369,11 @@ class Puzz {
     el.style.left      = `${x}px`;
     el.style.top       = `${y}px`;
     el.style.transform = `rotate(${rot}deg)`;
+  }
+
+  _isMobilePlaced() {
+    return (this.config.mobileMode || 'drag') === 'placed' &&
+           window.matchMedia('(max-width: 768px)').matches;
   }
 
   // ── Drag & Drop ───────────────────────────────────────
@@ -456,6 +470,22 @@ class Puzz {
     }
   }
 
+  _placeInSlot(state) {
+    const slot      = this.slots[state.slotIndex];
+    const frameRect = this.frameEl.getBoundingClientRect();
+    const rootRect  = this.container.getBoundingClientRect();
+    const slotLeft  = frameRect.left - rootRect.left + slot.el.offsetLeft;
+    const slotTop   = frameRect.top  - rootRect.top  + slot.el.offsetTop;
+    state.el.style.left      = `${slotLeft}px`;
+    state.el.style.top       = `${slotTop}px`;
+    state.el.style.transform = 'rotate(0deg)';
+    state.el.classList.add('placed');
+    state.placed  = true;
+    slot.occupied = true;
+    if (slot.pathEl) slot.pathEl.style.opacity = '0';
+    else             slot.el.classList.add('occupied');
+  }
+
   // ── Flip / Info Panel ─────────────────────────────────
 
   _flip(el, state) {
@@ -465,6 +495,7 @@ class Puzz {
     }
     this._currentExpanded = { el, state };
     el.classList.add('flipped');
+    el.style.zIndex = 200;
     this._pauseTimer();
     const cfg = (this.config.pieces || [])[state.slotIndex] || {};
     this._openInfoPanel(cfg);
@@ -535,6 +566,7 @@ class Puzz {
     }
 
     this._resumeTimer();
+    el.style.zIndex = '';
     setTimeout(() => el.classList.remove('flipped'), 50);
   }
 
@@ -763,7 +795,7 @@ class Puzz {
       p.placed    = false;
       p.el.classList.remove('placed', 'flipped');
       p.labelEl.style.opacity = '1';
-      this._scatter(p.el);
+      if (!this._isMobilePlaced()) this._scatter(p.el);
     });
 
     this.slots.forEach(s => {
@@ -771,6 +803,11 @@ class Puzz {
       if (s.pathEl) s.pathEl.style.opacity = '1';
       else          s.el.classList.remove('occupied');
     });
+
+    if (this._isMobilePlaced()) {
+      this.pieces.forEach(p => this._placeInSlot(p));
+      this._frameBgEl.classList.add('revealed');
+    }
 
     this.timerEl.textContent = '0:00';
     cancelAnimationFrame(this.timerRafId);
