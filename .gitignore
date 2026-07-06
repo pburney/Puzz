@@ -1,0 +1,16 @@
+# Claude Code session files
+.claude/
+
+# Python
+*.pyc
+__pycache__/
+
+# macOS
+.DS_Store
+.AppleDouble
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="6-piece-new.svg"
+   inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="1.4307099"
+     inkscape:cx="394.90886"
+     inkscape:cy="530.1564"
+     inkscape:window-width="1033"
+     inkscape:window-height="749"
+     inkscape:window-x="490"
+     inkscape:window-y="32"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Simple-geometric"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       d="m 139.67675,131.11448 -4.31705,51.88055 h 66.5396 v -53.87681 z"
+       style="fill:#1e85a3;stroke-width:14.0333;paint-order:stroke markers fill"
+       id="path9"
+       inkscape:label="bottom-right" />
+    <path
+       d="m 139.67675,131.11448 62.22255,-1.99626 V 74.994906 h -57.55256 z"
+       style="fill:#1e85a3;stroke-width:14.0333;paint-order:stroke markers fill"
+       id="path8"
+       inkscape:label="top-right" />
+    <path
+       d="m 67.39692,133.43372 -57.4977826,1.84536 v 47.71595 H 71.732056 Z"
+       style="fill:#1e85a3;stroke-width:14.0333;paint-order:stroke markers fill"
+       id="path7"
+       inkscape:label="bottom-left" />
+    <path
+       d="m 67.39692,133.43372 4.335136,49.56131 H 135.3597 l 4.31705,-51.88055 z"
+       style="fill:#1e85a3;stroke-width:14.0333;paint-order:stroke markers fill"
+       id="path6"
+       inkscape:label="bottom-center" />
+    <path
+       d="M 62.28457,74.994906 H 9.8991374 V 135.27908 L 67.39692,133.43372 Z"
+       style="display:inline;fill:#1e85a3;stroke-width:14.0333;paint-order:stroke markers fill"
+       id="path5"
+       inkscape:label="top-left" />
+    <path
+       d="m 62.28457,74.994906 5.11235,58.438814 72.27983,-2.31924 4.66999,-56.119574 z"
+       style="fill:#1e85a3;stroke-width:14.0333;paint-order:stroke markers fill"
+       id="path4"
+       inkscape:label="top-center" />
+  </g>
+</svg>

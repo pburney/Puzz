@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Puzz Tests</title>
+  <style>
+    body { font-family: monospace; background: #1a1a2e; color: #ccc; margin: 0; padding: 24px; }
+    h1   { color: #c084fc; font-size: 1.3rem; margin: 0 0 20px; }
+    #summary { font-size: 1rem; margin-bottom: 20px; font-weight: 700; }
+    .pass { color: #4ade80; }
+    .fail { color: #f87171; }
+    .group { color: #a78bfa; font-size: 0.85rem; margin: 20px 0 6px; letter-spacing: 0.05em; text-transform: uppercase; }
+    .case  { font-size: 0.82rem; padding: 2px 0; }
+    .case .detail { color: rgba(255,255,255,0.45); margin-left: 1.5em; display: block; }
+  </style>
+</head>
+<body>
+  <h1>Puzz Test Suite</h1>
+  <div id="summary"></div>
+  <div id="results"></div>
+
+  <script src="../puzz.js"></script>
+  <script>
+    'use strict';
+    let pass = 0, fail = 0;
+    const results = document.getElementById('results');
+
+    function group(label) {
+      const d = document.createElement('div');
+      d.className = 'group';
+      d.textContent = label;
+      results.appendChild(d);
+    }
+
+    function assert(label, actual, expected) {
+      const ok = JSON.stringify(actual) === JSON.stringify(expected);
+      ok ? pass++ : fail++;
+      const d = document.createElement('div');
+      d.className = 'case';
+      d.innerHTML = `<span class="${ok ? 'pass' : 'fail'}">${ok ? '✓' : '✗'} ${label}</span>`;
+      if (!ok) {
+        const detail = document.createElement('span');
+        detail.className = 'detail';
+        detail.textContent = `got: ${JSON.stringify(actual)}  expected: ${JSON.stringify(expected)}`;
+        d.appendChild(detail);
+      }
+      results.appendChild(d);
+    }
+
+    // ── _fmtTime ──────────────────────────────────────────
+    group('Puzz._fmtTime');
+    assert('0 ms → 0:00',     Puzz._fmtTime(0),       '0:00');
+    assert('30 s → 0:30',     Puzz._fmtTime(30000),   '0:30');
+    assert('90 s → 1:30',     Puzz._fmtTime(90000),   '1:30');
+    assert('3600 s → 60:00',  Puzz._fmtTime(3600000), '60:00');
+    assert('61 s → 1:01',     Puzz._fmtTime(61000),   '1:01');
+
+    // ── GRID_PRESETS ─────────────────────────────────────
+    group('Puzz.GRID_PRESETS');
+    assert('4  → [2,2]',  Puzz.GRID_PRESETS[4],  [2,2]);
+    assert('6  → [3,2]',  Puzz.GRID_PRESETS[6],  [3,2]);
+    assert('9  → [3,3]',  Puzz.GRID_PRESETS[9],  [3,3]);
+    assert('15 → [5,3]',  Puzz.GRID_PRESETS[15], [5,3]);
+    assert('25 → [5,5]',  Puzz.GRID_PRESETS[25], [5,5]);
+    assert('7  → undefined', Puzz.GRID_PRESETS[7], undefined);
+
+    // ── _gridLayout ───────────────────────────────────────
+    group('_gridLayout (via prototype call)');
+    const fakeInstance = Object.create(Puzz.prototype);
+    const lay32 = fakeInstance._gridLayout(3, 2);
+    assert('3×2 type',          lay32.type,           'grid');
+    assert('3×2 total',         lay32.total,          6);
+    assert('3×2 cols',          lay32.cols,           3);
+    assert('3×2 rows',          lay32.rows,           2);
+    assert('3×2 piece count',   lay32.pieces.length,  6);
+    assert('p0 origin',         lay32.pieces[0].origin, [0, 0]);
+    assert('p0 size',           lay32.pieces[0].size,   [1/3, 1/2]);
+    assert('p1 origin',         lay32.pieces[1].origin, [1/3, 0]);
+    assert('p5 origin (last)',  lay32.pieces[5].origin, [2/3, 1/2]);
+
+    const lay22 = fakeInstance._gridLayout(2, 2);
+    assert('2×2 total',         lay22.total,  4);
+    assert('2×2 piece count',   lay22.pieces.length, 4);
+
+    const lay55 = fakeInstance._gridLayout(5, 5);
+    assert('5×5 total',         lay55.total,  25);
+
+    // ── _renderMarkdown ───────────────────────────────────
+    group('Puzz._renderMarkdown — empty / plain');
+    assert('empty string',      Puzz._renderMarkdown(''),      '');
+    assert('null-ish (empty)',   Puzz._renderMarkdown(null),   '');
+    assert('plain text → p',    Puzz._renderMarkdown('Hello'), '<p>Hello</p>');
+    assert('two words → p',     Puzz._renderMarkdown('Hello world'), '<p>Hello world</p>');
+
+    group('Puzz._renderMarkdown — headings');
+    assert('## heading',  Puzz._renderMarkdown('## Mountains'), '<h2>Mountains</h2>');
+    assert('### heading', Puzz._renderMarkdown('### Detail'),   '<h3>Detail</h3>');
+    assert('## with inline bold',
+      Puzz._renderMarkdown('## **Bold** Title'),
+      '<h2><strong>Bold</strong> Title</h2>');
+
+    group('Puzz._renderMarkdown — inline formatting');
+    assert('**bold**',    Puzz._renderMarkdown('**bold**'),  '<p><strong>bold</strong></p>');
+    assert('*italic*',    Puzz._renderMarkdown('*italic*'),  '<p><em>italic</em></p>');
+    assert('_italic_',    Puzz._renderMarkdown('_italic_'),  '<p><em>italic</em></p>');
+    assert('bold + italic in sentence',
+      Puzz._renderMarkdown('A **bold** and *italic* word.'),
+      '<p>A <strong>bold</strong> and <em>italic</em> word.</p>');
+    assert('link',
+      Puzz._renderMarkdown('[Click here](https://example.com)'),
+      '<p><a href="https://example.com" target="_blank" rel="noopener">Click here</a></p>');
+    assert('javascript: link sanitized to #',
+      Puzz._renderMarkdown('[click](javascript:alert(1))'),
+      '<p><a href="#" target="_blank" rel="noopener">click</a></p>');
+
+    group('Puzz._renderMarkdown — lists');
+    assert('single - item',
+      Puzz._renderMarkdown('- Alpha'),
+      '<ul><li>Alpha</li></ul>');
+    assert('multiple - items',
+      Puzz._renderMarkdown('- Alpha\n- Beta\n- Gamma'),
+      '<ul><li>Alpha</li><li>Beta</li><li>Gamma</li></ul>');
+    assert('* items also work',
+      Puzz._renderMarkdown('* One\n* Two'),
+      '<ul><li>One</li><li>Two</li></ul>');
+    assert('list item with bold',
+      Puzz._renderMarkdown('- **Important** item'),
+      '<ul><li><strong>Important</strong> item</li></ul>');
+
+    group('Puzz._renderMarkdown — paragraphs');
+    assert('two paragraphs separated by blank line',
+      Puzz._renderMarkdown('First para.\n\nSecond para.'),
+      '<p>First para.</p>\n<p>Second para.</p>');
+    assert('consecutive lines join into one para',
+      Puzz._renderMarkdown('Line one\nLine two'),
+      '<p>Line one Line two</p>');
+
+    group('Puzz._renderMarkdown — mixed content');
+    const mixed = '## Title\n\nA **bold** intro.\n\n- Item A\n- Item B\n\n### Sub\n\nFinal para.';
+    const mixedResult = Puzz._renderMarkdown(mixed);
+    assert('mixed: starts with h2',    mixedResult.startsWith('<h2>Title</h2>'), true);
+    assert('mixed: contains strong',   mixedResult.includes('<strong>bold</strong>'), true);
+    assert('mixed: contains ul',       mixedResult.includes('<ul>'), true);
+    assert('mixed: contains li',       mixedResult.includes('<li>Item A</li>'), true);
+    assert('mixed: contains h3',       mixedResult.includes('<h3>Sub</h3>'), true);
+    assert('mixed: ends with para',    mixedResult.endsWith('<p>Final para.</p>'), true);
+
+    // ── Summary ───────────────────────────────────────────
+    const total = pass + fail;
+    const summary = document.getElementById('summary');
+    summary.className = fail === 0 ? 'pass' : 'fail';
+    summary.textContent = fail === 0
+      ? `All ${total} tests passed`
+      : `${fail} of ${total} tests FAILED`;
+  </script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+{
+  "image": "sample.jpg",
+  "title": "Puzz Demo",
+  "subtitle": "Drag the pieces into the frame",
+  "layout": { "type": "custom", "src": "layouts/6-geometric.json" },
+  "storageKey": "puzz-demo",
+  "completionMessage": "You put it all together!",
+  "celebrationEmojis": ["🎉","🌟","✨","🎊","🦋","🌈","🔥","💫","🎈","🍀","⭐","🌸","🎯","🎆","🥳"],
+  "pieces": [
+    {
+      "id": "p1",
+      "title": "Mountains",
+      "subtitle": "peaks & ridgelines",
+      "description": "## The High Country\n\nTowering peaks that pierce the clouds above the valley floor, reaching over **14,000 feet** at their highest point.\n\n- Rocky ridgelines carved by glaciers\n- Alpine meadows below the treeline\n- Snow-capped summits year-round"
+    },
+    {
+      "id": "p2",
+      "title": "Sky",
+      "subtitle": "light & atmosphere",
+      "description": "## A Canvas of Light\n\nThe atmosphere here is *extraordinary* — light bends through layers of moisture and dust, painting the sky in colors that shift by the minute.\n\n### Best times to look\n\n- **Golden hour** — 30 minutes after sunrise\n- **Blue hour** — just after sunset\n- Storm clearings reveal the sharpest light"
+    },
+    {
+      "id": "p3",
+      "title": "Forest",
+      "subtitle": "pine & fir",
+      "description": "Dense pine and fir trees carpet the hillsides, home to **hundreds of species** of birds and mammals.\n\nThe oldest trees here are over 400 years old. Learn more at [Rocky Mountain NP](https://www.nps.gov/romo/)."
+    },
+    {
+      "id": "p4",
+      "title": "River",
+      "subtitle": "valley floor",
+      "description": "## The River's Journey\n\nA winding ribbon of silver threading through the valley, fed by snowmelt from above.\n\nThe river drops nearly **2,000 feet** in elevation over its 40-mile run to the plains."
+    },
+    {
+      "id": "p5",
+      "title": "Meadow",
+      "subtitle": "wildflowers in bloom",
+      "description": "## Peak Bloom\n\nWildflowers blanket the open plain in *waves of color* from June through August.\n\n- Columbine (Colorado state flower)\n- Indian Paintbrush\n- **Blue Lupine** — visible from a quarter mile\n- Yarrow and Aster late in season"
+    },
+    {
+      "id": "p6",
+      "title": "Reflection",
+      "subtitle": "still water",
+      "description": "The whole scene mirrored in still water below — a moment of *perfect symmetry* that lasts only until the first breath of wind breaks the surface."
+    }
+  ]
+}
