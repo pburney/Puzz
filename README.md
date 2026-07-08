@@ -16,6 +16,7 @@ Designed as a generic open-source component: use it as a personal-site conceit, 
 - **Escalating emoji celebration** — 5 waves of emojis, growing in count and speed each second; 🏆 mixed in when you beat your fastest time
 - **Word-by-word completion overlay** — auto-dismisses after 5 seconds; piece labels fade back in so you can keep exploring
 - **Persistent scores** via `localStorage` — tracks fastest time, completion count, history
+- **Localization** — flag buttons switch languages live; text fields accept a plain string or a `{code: text}` object
 - Zero dependencies — vanilla JS + CSS, no build step
 
 ---
@@ -90,6 +91,33 @@ The container element can be any size — Puzz fills it.
 | `title` | ✓ | Shown on the front face of the piece |
 | `subtitle` | | Smaller text below the title on the front face |
 | `description` | | Content shown in the info panel when the piece is flipped. Supports markdown — see [Markdown in Descriptions](#markdown-in-descriptions). |
+
+---
+
+## Localization
+
+Any user-facing text field — top-level `title`, `subtitle`, `completionMessage`, and each piece's `title`, `subtitle`, `description` — accepts **either** a plain string (single language, unchanged behavior) **or** an object keyed by language code:
+
+```json
+"title": { "en": "My Puzzle", "es": "Mi Rompecabezas", "pt": "Meu Quebra-cabeça", "fr": "Mon Puzzle" }
+```
+
+Declare which languages are available (and how their switcher button looks) with a top-level `languages` array:
+
+```json
+"languages": [
+  { "code": "en", "flag": "🇺🇸", "label": "English" },
+  { "code": "es", "flag": "🇲🇽", "label": "Español" },
+  { "code": "pt", "flag": "🇧🇷", "label": "Português" },
+  { "code": "fr", "flag": "🇨🇦", "label": "Français" }
+]
+```
+
+With 2+ languages configured, flag buttons appear in the bottom-left of the footer. Clicking one re-renders the puzzle's text in that language. Structural fields — `image`, `layout`, `storageKey`, `mobileMode`, `celebrationEmojis` — are shared across all languages and are never localized, so the same puzzle and score history carry over regardless of language.
+
+The active language is resolved on load in this order: last choice saved in `localStorage` (per `storageKey`) → browser language (`navigator.language`) if it matches a configured code → the first entry in `languages` → `"en"`. Omit `languages` (or list only one) and no switcher is shown — existing single-language configs work unchanged.
+
+A handful of built-in UI strings (the footer's "Solves"/"Fastest" labels and the restart button's tooltip) ship translated for `en`, `es`, `pt`, and `fr` in `Puzz.UI_STRINGS`.
 
 ---
 

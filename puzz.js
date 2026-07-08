@@ -11,11 +11,20 @@ class Puzz {
   // Supported piece counts for grid shorthand
   static GRID_PRESETS = { 4:[2,2], 6:[3,2], 9:[3,3], 15:[5,3], 25:[5,5] };
 
+  // Built-in chrome strings (footer labels, restart tooltip) not sourced from config
+  static UI_STRINGS = {
+    en: { solves: 'Solves',     fastest: 'Fastest',     restart: 'Restart' },
+    es: { solves: 'Resueltos',  fastest: 'Más rápido',  restart: 'Reiniciar' },
+    pt: { solves: 'Resolvidos', fastest: 'Mais rápido', restart: 'Reiniciar' },
+    fr: { solves: 'Résolus',    fastest: 'Plus rapide', restart: 'Recommencer' },
+  };
+
   constructor(container, configUrl) {
     this.container   = container;
     this.configUrl   = configUrl;
     this.config      = null;
     this.layout      = null;
+    this.currentLang = null;
     this.pieces      = [];   // { el, id, slotIndex, placed }
     this.slots       = [];   // { el, index, occupied }
     this.timerStart  = null;
@@ -31,6 +40,7 @@ class Puzz {
 
   async init() {
     this.config = await this._fetchJSON(this.configUrl);
+    this._resolveLanguage();
     this.layout = await this._buildLayout();
     this.container.classList.add('puzz-root');
     this._buildFrame();
@@ -45,6 +55,69 @@ class Puzz {
     const r = await fetch(url);
     if (!r.ok) throw new Error(`Puzz: failed to load ${url}`);
     return r.json();
+  }
+
+  // ── Localization ──────────────────────────────────────
+
+  _resolveLanguage() {
+    const codes = (this.config.languages || []).map(l => l.code);
+    const key = `${this.config.storageKey || 'default'}-lang`;
+    let saved = null;
+    try { saved = localStorage.getItem(key); } catch {}
+    if (saved && codes.includes(saved)) {
+      this.currentLang = saved;
+    } else {
+      const browser = (navigator.language || 'en').slice(0, 2);
+      this.currentLang = codes.includes(browser) ? browser : (codes[0] || 'en');
+    }
+    document.documentElement.lang = this.currentLang;
+  }
+
+  _t(value) {
+    if (value == null || typeof value === 'string') return value;
+    return value[this.currentLang] ?? value.en ?? Object.values(value)[0];
+  }
+
+  _ui(key) {
+    return (Puzz.UI_STRINGS[this.currentLang] || Puzz.UI_STRINGS.en)[key]
+      ?? Puzz.UI_STRINGS.en[key];
+  }
+
+  _setLanguage(code) {
+    if (code === this.currentLang) return;
+    this.currentLang = code;
+    try { localStorage.setItem(`${this.config.storageKey || 'default'}-lang`, code); } catch {}
+    document.documentElement.lang = code;
+    this._applyLanguage();
+  }
+
+  // Swaps visible text to the current language in place — piece positions,
+  // placement state, timer, and scores are untouched.
+  _applyLanguage() {
+    if (this._titleEl)    this._titleEl.textContent    = this._t(this.config.title);
+    if (this._subtitleEl) this._subtitleEl.textContent = this._t(this.config.subtitle);
+
+    this.pieces.forEach((p, i) => {
+      const cfg   = (this.config.pieces || [])[i] || {};
+      const title = this._t(cfg.title) || `Piece ${i + 1}`;
+      if (p.titleEl)     p.titleEl.textContent     = title;
+      if (p.subtitleEl)  p.subtitleEl.textContent  = this._t(cfg.subtitle) || '';
+      if (p.backTitleEl) p.backTitleEl.textContent = title;
+    });
+
+    if (this._currentExpanded) {
+      const cfg = (this.config.pieces || [])[this._currentExpanded.state.slotIndex] || {};
+      if (this._panelTitleEl)    this._panelTitleEl.textContent = this._t(cfg.title) || '';
+      if (this._panelSubtitleEl) this._panelSubtitleEl.textContent = this._t(cfg.subtitle) || '';
+      if (this._panelBodyEl)     this._panelBodyEl.innerHTML = Puzz._renderMarkdown(this._t(cfg.description) || '');
+    }
+
+    if (this._restartBtn) this._restartBtn.title = this._ui('restart');
+    this._loadScores();
+
+    this.container.querySelectorAll('.puzz-lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.code === this.currentLang);
+    });
   }
 
   // ── Layout ────────────────────────────────────────────
@@ -111,14 +184,16 @@ class Puzz {
     if (this.config.title) {
       const t = document.createElement('span');
       t.className = 'puzz-stage-title';
-      t.textContent = this.config.title;
+      t.textContent = this._t(this.config.title);
       header.appendChild(t);
+      this._titleEl = t;
     }
     if (this.config.subtitle) {
       const s = document.createElement('span');
       s.className = 'puzz-stage-subtitle';
-      s.textContent = this.config.subtitle;
+      s.textContent = this._t(this.config.subtitle);
       header.appendChild(s);
+      this._subtitleEl = s;
     }
     stage.appendChild(header);
 
@@ -162,6 +237,27 @@ class Puzz {
     const footer = document.createElement('div');
     footer.className = 'puzz-stage-footer';
 
+    if (this.config.languages && this.config.languages.length > 1) {
+      const switcher = document.createElement('div');
+      switcher.className = 'puzz-lang-switcher';
+      this.config.languages.forEach(({ code, flag, label }) => {
+        const btn = document.createElement('button');
+        btn.className = 'puzz-lang-btn' + (code === this.currentLang ? ' active' : '');
+        btn.textContent = flag;
+        btn.title = label || code;
+        btn.setAttribute('aria-label', label || code);
+        btn.dataset.code = code;
+        btn.addEventListener('click', () => this._setLanguage(code));
+        switcher.appendChild(btn);
+      });
+      footer.appendChild(switcher);
+
+      const langSep = document.createElement('span');
+      langSep.className = 'puzz-footer-sep';
+      langSep.textContent = '|';
+      footer.appendChild(langSep);
+    }
+
     this.solvesEl  = document.createElement('span');
     this.solvesEl.className = 'puzz-footer-stat';
 
@@ -183,8 +279,9 @@ class Puzz {
     const restartBtn = document.createElement('button');
     restartBtn.className = 'puzz-restart-btn';
     restartBtn.innerHTML = '&#x21BA;';
-    restartBtn.title = 'Restart';
+    restartBtn.title = this._ui('restart');
     restartBtn.addEventListener('click', () => this.reset());
+    this._restartBtn = restartBtn;
 
     footer.appendChild(this.solvesEl);
     footer.appendChild(sep1);
@@ -302,12 +399,13 @@ class Puzz {
       const label = document.createElement('div');
       label.className = 'puzz-piece-label';
       const span = document.createElement('span');
-      span.textContent = cfg.title || `Piece ${i + 1}`;
+      span.textContent = this._t(cfg.title) || `Piece ${i + 1}`;
       label.appendChild(span);
+      let sub = null;
       if (cfg.subtitle) {
-        const sub = document.createElement('small');
+        sub = document.createElement('small');
         sub.className = 'puzz-piece-subtitle';
-        sub.textContent = cfg.subtitle;
+        sub.textContent = this._t(cfg.subtitle);
         label.appendChild(sub);
       }
       front.appendChild(label);
@@ -318,14 +416,17 @@ class Puzz {
       const back = document.createElement('div');
       back.className = 'puzz-piece-back';
       const h3 = document.createElement('h3');
-      h3.textContent = cfg.title || `Piece ${i + 1}`;
+      h3.textContent = this._t(cfg.title) || `Piece ${i + 1}`;
       back.appendChild(h3);
       inner.appendChild(back);
 
       piece.appendChild(inner);
       this.container.appendChild(piece);
 
-      const state = { el: piece, id: lp.id, slotIndex: i, placed: false, labelEl: label };
+      const state = {
+        el: piece, id: lp.id, slotIndex: i, placed: false, labelEl: label,
+        titleEl: span, subtitleEl: sub, backTitleEl: h3,
+      };
 
       this._scatter(piece);
       if (this._isMobilePlaced()) {
@@ -374,7 +475,12 @@ class Puzz {
   // ── Drag & Drop ───────────────────────────────────────
 
   _enableDrag(el, state) {
-    let startX, startY, startLeft, startTop, dragging = false, moved = false;
+    let startX, startY, startLeft, startTop, dragging = false, moved = false, tapThreshold = 4;
+
+    // Chromium fires a synthetic compatibility `click` after `touchend`, keyed off
+    // whether the raw touch sequence (not the pointer sequence) was prevented — so
+    // this no-op listener exists purely to suppress that ghost click.
+    el.addEventListener('touchend', e => e.preventDefault(), { passive: false });
 
     el.addEventListener('pointerdown', e => {
       if (this._currentExpanded) return;
@@ -383,6 +489,9 @@ class Puzz {
       startX = e.clientX;
       startY = e.clientY;
       moved  = false;
+      // Touch/pen contact wobbles more than a mouse cursor — give it a looser
+      // tap-vs-drag threshold so small finger jitter doesn't misfire as a drag.
+      tapThreshold = e.pointerType === 'mouse' ? 4 : 10;
 
       if (state.placed) return; // no drag for placed pieces, but startX/Y recorded for tap
 
@@ -402,7 +511,7 @@ class Puzz {
       if (!dragging) return;
       const dx = e.clientX - startX;
       const dy = e.clientY - startY;
-      if (!moved && Math.hypot(dx, dy) > 4) moved = true;
+      if (!moved && Math.hypot(dx, dy) > tapThreshold) moved = true;
       if (moved) {
         el.style.left = `${startLeft + dx}px`;
         el.style.top  = `${startTop  + dy}px`;
@@ -515,21 +624,26 @@ class Puzz {
 
     const title = document.createElement('h2');
     title.className = 'puzz-info-title';
-    title.textContent = cfg.title || '';
+    title.textContent = this._t(cfg.title) || '';
     panel.appendChild(title);
+    this._panelTitleEl = title;
 
+    this._panelSubtitleEl = null;
     if (cfg.subtitle) {
       const sub = document.createElement('p');
       sub.className = 'puzz-info-subtitle';
-      sub.textContent = cfg.subtitle;
+      sub.textContent = this._t(cfg.subtitle);
       panel.appendChild(sub);
+      this._panelSubtitleEl = sub;
     }
 
+    this._panelBodyEl = null;
     if (cfg.description) {
       const body = document.createElement('div');
       body.className = 'puzz-info-body';
-      body.innerHTML = Puzz._renderMarkdown(cfg.description);
+      body.innerHTML = Puzz._renderMarkdown(this._t(cfg.description));
       panel.appendChild(body);
+      this._panelBodyEl = body;
     }
 
     this.container.appendChild(backdrop);
@@ -682,7 +796,7 @@ class Puzz {
     });
 
     const t = setTimeout(() => {
-      this._showCompletionOverlay(this.config.completionMessage || 'Puzzle complete!');
+      this._showCompletionOverlay(this._t(this.config.completionMessage) || 'Puzzle complete!');
     }, 1500);
     this._celebrationTimeouts.push(t);
   }
@@ -840,10 +954,10 @@ class Puzz {
 
   _updateFooterStats(scores) {
     if (!this.solvesEl) return;
-    this.solvesEl.textContent  = `Solves: ${scores.completions > 0 ? scores.completions : '—'}`;
+    this.solvesEl.textContent  = `${this._ui('solves')}: ${scores.completions > 0 ? scores.completions : '—'}`;
     this.fastestEl.textContent = scores.fastestTime
-      ? `Fastest: ${Puzz._fmtTime(scores.fastestTime)}`
-      : 'Fastest: —';
+      ? `${this._ui('fastest')}: ${Puzz._fmtTime(scores.fastestTime)}`
+      : `${this._ui('fastest')}: —`;
   }
 
   // ── Markdown ──────────────────────────────────────────

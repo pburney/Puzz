@@ -1,47 +1,128 @@
 {
   "image": "sample.jpg",
-  "title": "Puzz Demo",
-  "subtitle": "Drag the pieces into the frame",
+  "languages": [
+    { "code": "en", "flag": "🇺🇸", "label": "English" },
+    { "code": "es", "flag": "🇲🇽", "label": "Español" },
+    { "code": "pt", "flag": "🇧🇷", "label": "Português" },
+    { "code": "fr", "flag": "🇨🇦", "label": "Français" }
+  ],
+  "title": {
+    "en": "Puzz Demo",
+    "es": "Demo de Puzz",
+    "pt": "Demo do Puzz",
+    "fr": "Démo Puzz"
+  },
+  "subtitle": {
+    "en": "Drag the pieces into the frame",
+    "es": "Arrastra las piezas al marco",
+    "pt": "Arraste as peças para o quadro",
+    "fr": "Glissez les pièces dans le cadre"
+  },
   "layout": { "type": "custom", "src": "layouts/6-geometric.json" },
   "storageKey": "puzz-demo",
-  "completionMessage": "You put it all together!",
+  "completionMessage": {
+    "en": "You put it all together!",
+    "es": "¡Lo armaste todo!",
+    "pt": "Você montou tudo!",
+    "fr": "Vous avez tout assemblé !"
+  },
   "celebrationEmojis": ["🎉","🌟","✨","🎊","🦋","🌈","🔥","💫","🎈","🍀","⭐","🌸","🎯","🎆","🥳"],
   "pieces": [
     {
       "id": "p1",
-      "title": "Mountains",
-      "subtitle": "peaks & ridgelines",
-      "description": "## The High Country\n\nTowering peaks that pierce the clouds above the valley floor, reaching over **14,000 feet** at their highest point.\n\n- Rocky ridgelines carved by glaciers\n- Alpine meadows below the treeline\n- Snow-capped summits year-round"
+      "title": { "en": "Mountains", "es": "Montañas", "pt": "Montanhas", "fr": "Montagnes" },
+      "subtitle": {
+        "en": "peaks & ridgelines",
+        "es": "picos y crestas",
+        "pt": "picos e cumes",
+        "fr": "sommets et crêtes"
+      },
+      "description": {
+        "en": "## The High Country\n\nTowering peaks that pierce the clouds above the valley floor, reaching over **14,000 feet** at their highest point.\n\n- Rocky ridgelines carved by glaciers\n- Alpine meadows below the treeline\n- Snow-capped summits year-round",
+        "es": "## Las Tierras Altas\n\nPicos imponentes que perforan las nubes sobre el fondo del valle, alcanzando más de **4.300 metros** en su punto más alto.\n\n- Crestas rocosas talladas por glaciares\n- Prados alpinos bajo el límite del bosque\n- Cumbres nevadas todo el año",
+        "pt": "## As Terras Altas\n\nPicos imponentes que atravessam as nuvens acima do fundo do vale, alcançando mais de **4.300 metros** em seu ponto mais alto.\n\n- Cumes rochosos esculpidos por geleiras\n- Prados alpinos abaixo do limite da vegetação\n- Cumes cobertos de neve o ano todo",
+        "fr": "## Les hautes terres\n\nDes sommets imposants qui percent les nuages au-dessus du fond de la vallée, atteignant plus de **4 300 mètres** à leur point culminant.\n\n- Crêtes rocheuses sculptées par les glaciers\n- Prairies alpines sous la limite forestière\n- Sommets enneigés toute l'année"
+      }
     },
     {
       "id": "p2",
-      "title": "Sky",
-      "subtitle": "light & atmosphere",
-      "description": "## A Canvas of Light\n\nThe atmosphere here is *extraordinary* — light bends through layers of moisture and dust, painting the sky in colors that shift by the minute.\n\n### Best times to look\n\n- **Golden hour** — 30 minutes after sunrise\n- **Blue hour** — just after sunset\n- Storm clearings reveal the sharpest light"
+      "title": { "en": "Sky", "es": "Cielo", "pt": "Céu", "fr": "Ciel" },
+      "subtitle": {
+        "en": "light & atmosphere",
+        "es": "luz y atmósfera",
+        "pt": "luz e atmosfera",
+        "fr": "lumière et atmosphère"
+      },
+      "description": {
+        "en": "## A Canvas of Light\n\nThe atmosphere here is *extraordinary* — light bends through layers of moisture and dust, painting the sky in colors that shift by the minute.\n\n### Best times to look\n\n- **Golden hour** — 30 minutes after sunrise\n- **Blue hour** — just after sunset\n- Storm clearings reveal the sharpest light",
+        "es": "## Un Lienzo de Luz\n\nLa atmósfera aquí es *extraordinaria* — la luz se curva a través de capas de humedad y polvo, pintando el cielo con colores que cambian minuto a minuto.\n\n### Mejores momentos para mirar\n\n- **Hora dorada** — 30 minutos después del amanecer\n- **Hora azul** — justo después del atardecer\n- Los despejes tras la tormenta revelan la luz más nítida",
+        "pt": "## Uma Tela de Luz\n\nA atmosfera aqui é *extraordinária* — a luz se curva através de camadas de umidade e poeira, pintando o céu com cores que mudam a cada minuto.\n\n### Melhores momentos para observar\n\n- **Hora dourada** — 30 minutos após o nascer do sol\n- **Hora azul** — logo após o pôr do sol\n- Aberturas após a tempestade revelam a luz mais nítida",
+        "fr": "## Une toile de lumière\n\nL'atmosphère ici est *extraordinaire* — la lumière se courbe à travers des couches d'humidité et de poussière, peignant le ciel de couleurs qui changent à chaque minute.\n\n### Meilleurs moments pour observer\n\n- **Heure dorée** — 30 minutes après le lever du soleil\n- **Heure bleue** — juste après le coucher du soleil\n- Les éclaircies d'orage révèlent la lumière la plus nette"
+      }
     },
     {
       "id": "p3",
-      "title": "Forest",
-      "subtitle": "pine & fir",
-      "description": "Dense pine and fir trees carpet the hillsides, home to **hundreds of species** of birds and mammals.\n\nThe oldest trees here are over 400 years old. Learn more at [Rocky Mountain NP](https://www.nps.gov/romo/)."
+      "title": { "en": "Forest", "es": "Bosque", "pt": "Floresta", "fr": "Forêt" },
+      "subtitle": {
+        "en": "pine & fir",
+        "es": "pino y abeto",
+        "pt": "pinheiro e abeto",
+        "fr": "pins et sapins"
+      },
+      "description": {
+        "en": "Dense pine and fir trees carpet the hillsides, home to **hundreds of species** of birds and mammals.\n\nThe oldest trees here are over 400 years old. Learn more at [Rocky Mountain NP](https://www.nps.gov/romo/).",
+        "es": "Densos pinos y abetos cubren las laderas, hogar de **cientos de especies** de aves y mamíferos.\n\nLos árboles más antiguos aquí tienen más de 400 años. Aprende más en [Rocky Mountain NP](https://www.nps.gov/romo/).",
+        "pt": "Densos pinheiros e abetos cobrem as encostas, lar de **centenas de espécies** de aves e mamíferos.\n\nAs árvores mais antigas aqui têm mais de 400 anos. Saiba mais em [Rocky Mountain NP](https://www.nps.gov/romo/).",
+        "fr": "Des pins et des sapins denses recouvrent les collines, abritant **des centaines d'espèces** d'oiseaux et de mammifères.\n\nLes arbres les plus anciens ici ont plus de 400 ans. En savoir plus sur [Rocky Mountain NP](https://www.nps.gov/romo/)."
+      }
     },
     {
       "id": "p4",
-      "title": "River",
-      "subtitle": "valley floor",
-      "description": "## The River's Journey\n\nA winding ribbon of silver threading through the valley, fed by snowmelt from above.\n\nThe river drops nearly **2,000 feet** in elevation over its 40-mile run to the plains."
+      "title": { "en": "River", "es": "Río", "pt": "Rio", "fr": "Rivière" },
+      "subtitle": {
+        "en": "valley floor",
+        "es": "fondo del valle",
+        "pt": "fundo do vale",
+        "fr": "fond de la vallée"
+      },
+      "description": {
+        "en": "## The River's Journey\n\nA winding ribbon of silver threading through the valley, fed by snowmelt from above.\n\nThe river drops nearly **2,000 feet** in elevation over its 40-mile run to the plains.",
+        "es": "## El Viaje del Río\n\nUna cinta plateada y sinuosa que atraviesa el valle, alimentada por el deshielo de las alturas.\n\nEl río desciende casi **600 metros** de elevación a lo largo de sus 64 kilómetros hasta las llanuras.",
+        "pt": "## A Jornada do Rio\n\nUma fita prateada e sinuosa que atravessa o vale, alimentada pelo derretimento da neve das alturas.\n\nO rio desce quase **600 metros** de altitude ao longo de seus 64 quilômetros até as planícies.",
+        "fr": "## Le parcours de la rivière\n\nUn ruban d'argent sinueux qui traverse la vallée, alimenté par la fonte des neiges d'en haut.\n\nLa rivière descend de près de **600 mètres** d'altitude sur ses 64 kilomètres jusqu'aux plaines."
+      }
     },
     {
       "id": "p5",
-      "title": "Meadow",
-      "subtitle": "wildflowers in bloom",
-      "description": "## Peak Bloom\n\nWildflowers blanket the open plain in *waves of color* from June through August.\n\n- Columbine (Colorado state flower)\n- Indian Paintbrush\n- **Blue Lupine** — visible from a quarter mile\n- Yarrow and Aster late in season"
+      "title": { "en": "Meadow", "es": "Pradera", "pt": "Campina", "fr": "Prairie" },
+      "subtitle": {
+        "en": "wildflowers in bloom",
+        "es": "flores silvestres en flor",
+        "pt": "flores silvestres em flor",
+        "fr": "fleurs sauvages en fleurs"
+      },
+      "description": {
+        "en": "## Peak Bloom\n\nWildflowers blanket the open plain in *waves of color* from June through August.\n\n- Columbine (Colorado state flower)\n- Indian Paintbrush\n- **Blue Lupine** — visible from a quarter mile\n- Yarrow and Aster late in season",
+        "es": "## Máxima Floración\n\nLas flores silvestres cubren la llanura abierta en *oleadas de color* de junio a agosto.\n\n- Aguileña (flor del estado de Colorado)\n- Castilleja (pincel indio)\n- **Lupino azul** — visible desde un cuarto de milla\n- Milenrama y áster al final de la temporada",
+        "pt": "## Floração Máxima\n\nAs flores silvestres cobrem a planície aberta em *ondas de cor* de junho a agosto.\n\n- Aquilégia (flor do estado do Colorado)\n- Castilleja (pincel-indiano)\n- **Tremoço azul** — visível a um quarto de milha de distância\n- Mil-folhas e áster no final da estação",
+        "fr": "## Pleine floraison\n\nLes fleurs sauvages recouvrent la plaine ouverte de *vagues de couleur* de juin à août.\n\n- Ancolie (fleur emblème du Colorado)\n- Castilleja (pinceau indien)\n- **Lupin bleu** — visible à un quart de mille\n- Achillée et aster en fin de saison"
+      }
     },
     {
       "id": "p6",
-      "title": "Reflection",
-      "subtitle": "still water",
-      "description": "The whole scene mirrored in still water below — a moment of *perfect symmetry* that lasts only until the first breath of wind breaks the surface."
+      "title": { "en": "Reflection", "es": "Reflejo", "pt": "Reflexo", "fr": "Reflet" },
+      "subtitle": {
+        "en": "still water",
+        "es": "agua quieta",
+        "pt": "água parada",
+        "fr": "eau calme"
+      },
+      "description": {
+        "en": "The whole scene mirrored in still water below — a moment of *perfect symmetry* that lasts only until the first breath of wind breaks the surface.",
+        "es": "Toda la escena reflejada en el agua quieta de abajo — un momento de *simetría perfecta* que dura solo hasta que el primer soplo de viento rompe la superficie.",
+        "pt": "Toda a cena refletida na água parada abaixo — um momento de *simetria perfeita* que dura apenas até o primeiro sopro de vento romper a superfície.",
+        "fr": "Toute la scène se reflète dans l'eau calme en contrebas — un instant de *symétrie parfaite* qui ne dure que jusqu'à ce que le premier souffle de vent en brise la surface."
+      }
     }
   ]
 }
