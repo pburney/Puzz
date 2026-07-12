@@ -101,6 +101,7 @@
 
 /* ── STAGE FOOTER ────────────────────────────────────── */
 .puzz-stage-footer {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -115,13 +116,7 @@
   color: rgba(255,255,255,0.6);
 }
 
-.puzz-lang-switcher {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.puzz-lang-btn {
+.puzz-lang-trigger {
   background: none;
   border: 1px solid transparent;
   border-radius: 4px;
@@ -129,17 +124,82 @@
   line-height: 1;
   padding: 2px 4px;
   cursor: pointer;
-  opacity: 0.55;
+  opacity: 0.7;
   transition: opacity 0.15s, border-color 0.15s;
 }
 
-.puzz-lang-btn:hover {
-  opacity: 0.85;
-}
-
-.puzz-lang-btn.active {
+.puzz-lang-trigger:hover {
   opacity: 1;
   border-color: rgba(255,255,255,0.3);
+}
+
+.puzz-lang-menu {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+  background: linear-gradient(165deg, #2d2d2d 0%, #1a1a2e 100%);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+  padding: 4px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  z-index: 30;
+}
+
+.puzz-lang-menu.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.puzz-lang-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  border-radius: 5px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.85);
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.puzz-lang-menu-item:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.puzz-lang-menu-flag {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+@media (max-width: 600px) {
+  .puzz-stage-footer {
+    gap: 6px;
+    padding: 0 8px;
+    font-size: 0.68rem;
+  }
+
+  .puzz-footer-label {
+    display: none;
+  }
+
+  .puzz-restart-btn {
+    width: 22px;
+    height: 22px;
+    margin-left: 2px;
+  }
 }
 
 .puzz-footer-stat {

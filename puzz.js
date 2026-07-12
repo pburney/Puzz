@@ -47,7 +47,15 @@ class Puzz {
     this._buildPieces();
     this._loadScores();
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') this._closeExpanded();
+      if (e.key === 'Escape') {
+        this._closeExpanded();
+        this._closeLangMenu();
+      }
+    });
+    document.addEventListener('pointerdown', e => {
+      if (!this._langMenuEl) return;
+      if (this._langMenuEl.contains(e.target) || this._langTriggerBtn.contains(e.target)) return;
+      this._closeLangMenu();
     });
   }
 
@@ -114,10 +122,16 @@ class Puzz {
 
     if (this._restartBtn) this._restartBtn.title = this._ui('restart');
     this._loadScores();
+    this._updateLangTrigger();
+  }
 
-    this.container.querySelectorAll('.puzz-lang-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.code === this.currentLang);
-    });
+  _updateLangTrigger() {
+    if (!this._langTriggerBtn) return;
+    const lang = (this.config.languages || []).find(l => l.code === this.currentLang);
+    if (!lang) return;
+    this._langTriggerBtn.textContent = lang.flag;
+    this._langTriggerBtn.title = lang.label || lang.code;
+    this._langTriggerBtn.setAttribute('aria-label', lang.label || lang.code);
   }
 
   // ── Layout ────────────────────────────────────────────
@@ -236,21 +250,18 @@ class Puzz {
     // Footer — Solves | Fastest | Timer | Restart
     const footer = document.createElement('div');
     footer.className = 'puzz-stage-footer';
+    this._footerEl = footer;
 
     if (this.config.languages && this.config.languages.length > 1) {
-      const switcher = document.createElement('div');
-      switcher.className = 'puzz-lang-switcher';
-      this.config.languages.forEach(({ code, flag, label }) => {
-        const btn = document.createElement('button');
-        btn.className = 'puzz-lang-btn' + (code === this.currentLang ? ' active' : '');
-        btn.textContent = flag;
-        btn.title = label || code;
-        btn.setAttribute('aria-label', label || code);
-        btn.dataset.code = code;
-        btn.addEventListener('click', () => this._setLanguage(code));
-        switcher.appendChild(btn);
+      const trigger = document.createElement('button');
+      trigger.className = 'puzz-lang-trigger';
+      trigger.addEventListener('click', e => {
+        e.stopPropagation();
+        this._toggleLangMenu();
       });
-      footer.appendChild(switcher);
+      footer.appendChild(trigger);
+      this._langTriggerBtn = trigger;
+      this._updateLangTrigger();
 
       const langSep = document.createElement('span');
       langSep.className = 'puzz-footer-sep';
@@ -691,6 +702,47 @@ class Puzz {
     }
   }
 
+  // ── Language Menu ─────────────────────────────────────
+
+  _toggleLangMenu() {
+    if (this._langMenuEl) this._closeLangMenu();
+    else this._openLangMenu();
+  }
+
+  _openLangMenu() {
+    const menu = document.createElement('div');
+    menu.className = 'puzz-lang-menu';
+
+    (this.config.languages || [])
+      .filter(({ code }) => code !== this.currentLang)
+      .forEach(({ code, flag, label }) => {
+        const item = document.createElement('button');
+        item.className = 'puzz-lang-menu-item';
+        item.innerHTML = `<span class="puzz-lang-menu-flag">${flag}</span>${label || code}`;
+        item.addEventListener('click', e => {
+          e.stopPropagation();
+          this._setLanguage(code);
+          this._closeLangMenu();
+        });
+        menu.appendChild(item);
+      });
+
+    this._footerEl.appendChild(menu);
+    this._langMenuEl = menu;
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => menu.classList.add('visible'));
+    });
+  }
+
+  _closeLangMenu() {
+    if (!this._langMenuEl) return;
+    const menuEl = this._langMenuEl;
+    this._langMenuEl = null;
+    menuEl.classList.remove('visible');
+    setTimeout(() => menuEl.remove(), 250);
+  }
+
   // ── Timer ─────────────────────────────────────────────
 
   _startTimer() {
@@ -954,10 +1006,10 @@ class Puzz {
 
   _updateFooterStats(scores) {
     if (!this.solvesEl) return;
-    this.solvesEl.textContent  = `${this._ui('solves')}: ${scores.completions > 0 ? scores.completions : '—'}`;
-    this.fastestEl.textContent = scores.fastestTime
-      ? `${this._ui('fastest')}: ${Puzz._fmtTime(scores.fastestTime)}`
-      : `${this._ui('fastest')}: —`;
+    const solvesVal  = scores.completions > 0 ? scores.completions : '—';
+    const fastestVal = scores.fastestTime ? Puzz._fmtTime(scores.fastestTime) : '—';
+    this.solvesEl.innerHTML  = `<span class="puzz-footer-label">${this._ui('solves')}: </span>${solvesVal}`;
+    this.fastestEl.innerHTML = `<span class="puzz-footer-label">${this._ui('fastest')}: </span>${fastestVal}`;
   }
 
   // ── Markdown ──────────────────────────────────────────
