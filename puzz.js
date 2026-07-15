@@ -40,12 +40,14 @@ class Puzz {
 
   async init() {
     this.config = await this._fetchJSON(this.configUrl);
+    this._mergeStaticContent();
     this._resolveLanguage();
     this.layout = await this._buildLayout();
     this.container.classList.add('puzz-root');
     this._buildFrame();
     this._buildPieces();
     this._loadScores();
+    this._dissolveStaticContent();
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
         this._closeExpanded();
@@ -65,6 +67,85 @@ class Puzz {
     return r.json();
   }
 
+  // ── Static content (progressive enhancement / SEO) ─────
+  // Reads a static, crawlable markup block (default #puzz-content) and
+  // merges it into this.config in the same {code: text} shape JSON authoring
+  // already produces, so _buildPieces/_openInfoPanel/_applyLanguage need no
+  // knowledge of where the text came from. No-op if the block isn't present.
+
+  _mergeStaticContent() {
+    const src = document.querySelector(this.config.contentSelector || '#puzz-content');
+    if (!src) return;
+    this._staticContentEl = src;
+
+    const readLangBlocks = scope => {
+      const map = {};
+      scope.querySelectorAll(':scope > [lang]').forEach(el => { map[el.lang] = el; });
+      return map;
+    };
+
+    const meta = src.querySelector('[data-role="meta"]');
+    if (meta) {
+      const langs = readLangBlocks(meta);
+      const pick = sel => {
+        const out = {};
+        for (const code in langs) {
+          const el = langs[code].querySelector(sel);
+          if (el) out[code] = el.textContent.trim();
+        }
+        return Object.keys(out).length ? out : undefined;
+      };
+      this.config.title             = pick('h1')               || this.config.title;
+      this.config.subtitle          = pick('.puzz-subtitle')    || this.config.subtitle;
+      this.config.tagline           = pick('.puzz-tagline')     || this.config.tagline;
+      this.config.completionMessage = pick('.puzz-completion')  || this.config.completionMessage;
+    }
+
+    src.querySelectorAll('[data-piece]').forEach((pieceEl, i) => {
+      const cfg = (this.config.pieces || [])[i];
+      if (!cfg) return;
+      const langScope = pieceEl.querySelector('.puzz-piece-langs') || pieceEl;
+      const langs = readLangBlocks(langScope);
+      const title = {}, subtitle = {}, description = {};
+      for (const code in langs) {
+        const el   = langs[code];
+        const h3   = el.querySelector('h3');
+        const sub  = el.querySelector('.puzz-subtitle');
+        const desc = el.querySelector('.puzz-description');
+        if (h3)   title[code]       = h3.textContent.trim();
+        if (sub)  subtitle[code]    = sub.textContent.trim();
+        if (desc) description[code] = desc.innerHTML.trim();
+      }
+      if (Object.keys(title).length)       cfg.title    = title;
+      if (Object.keys(subtitle).length)    cfg.subtitle = subtitle;
+      if (Object.keys(description).length) { cfg.description = description; cfg.descriptionIsHTML = true; }
+    });
+
+    this._staticLangEls = src.querySelectorAll('[lang]');
+  }
+
+  _syncStaticLang() {
+    if (!this._staticLangEls) return;
+    this._staticLangEls.forEach(el => {
+      el.classList.toggle('puzz-lang-active', el.lang === this.currentLang);
+    });
+  }
+
+  // Cross-fades the static content away once the interactive puzzle has
+  // been built. Content stays in the DOM (clipped, not display:none) so it
+  // remains available to crawlers and the <noscript> fallback.
+  _dissolveStaticContent() {
+    const el = this._staticContentEl;
+    if (!el) return;
+    el.classList.add('puzz-content-dissolving');
+    const finish = () => {
+      el.classList.add('puzz-content-hidden');
+      el.setAttribute('aria-hidden', 'true');
+    };
+    el.addEventListener('transitionend', finish, { once: true });
+    setTimeout(finish, 900);
+  }
+
   // ── Localization ──────────────────────────────────────
 
   _resolveLanguage() {
@@ -79,6 +160,7 @@ class Puzz {
       this.currentLang = codes.includes(browser) ? browser : (codes[0] || 'en');
     }
     document.documentElement.lang = this.currentLang;
+    this._syncStaticLang();
   }
 
   _t(value) {
@@ -96,6 +178,7 @@ class Puzz {
     this.currentLang = code;
     try { localStorage.setItem(`${this.config.storageKey || 'default'}-lang`, code); } catch {}
     document.documentElement.lang = code;
+    this._syncStaticLang();
     this._applyLanguage();
   }
 
@@ -117,7 +200,9 @@ class Puzz {
       const cfg = (this.config.pieces || [])[this._currentExpanded.state.slotIndex] || {};
       if (this._panelTitleEl)    this._panelTitleEl.textContent = this._t(cfg.title) || '';
       if (this._panelSubtitleEl) this._panelSubtitleEl.textContent = this._t(cfg.subtitle) || '';
-      if (this._panelBodyEl)     this._panelBodyEl.innerHTML = Puzz._renderMarkdown(this._t(cfg.description) || '');
+      if (this._panelBodyEl)     this._panelBodyEl.innerHTML = cfg.descriptionIsHTML
+        ? (this._t(cfg.description) || '')
+        : Puzz._renderMarkdown(this._t(cfg.description) || '');
     }
 
     if (this._restartBtn) this._restartBtn.title = this._ui('restart');
@@ -652,7 +737,9 @@ class Puzz {
     if (cfg.description) {
       const body = document.createElement('div');
       body.className = 'puzz-info-body';
-      body.innerHTML = Puzz._renderMarkdown(this._t(cfg.description));
+      body.innerHTML = cfg.descriptionIsHTML
+        ? (this._t(cfg.description) || '')
+        : Puzz._renderMarkdown(this._t(cfg.description));
       panel.appendChild(body);
       this._panelBodyEl = body;
     }

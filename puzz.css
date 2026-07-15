@@ -516,3 +516,113 @@
   100% { transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--rot)); opacity: 0; }
 }
 
+/* ── STATIC CONTENT (progressive enhancement / SEO) ─────
+   Real, visible, semantic markup that puzz.js reads on init() and then
+   cross-fades away once the interactive puzzle is built. Stays in the DOM
+   (clipped, not display:none) so crawlers and the <noscript> fallback
+   still see it after the dissolve. */
+
+.puzz-story {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 6em 1.5em 4em;
+  list-style: none;
+  color: #fff;
+  font-family: sans-serif;
+}
+
+.puzz-story > li {
+  margin-bottom: 3em;
+  padding-bottom: 3em;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+
+.puzz-story > li:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.puzz-piece-langs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.puzz-piece-langs > li,
+[data-role="meta"] > div {
+  display: none;
+}
+
+.puzz-piece-langs > li.puzz-lang-active,
+[data-role="meta"] > div.puzz-lang-active {
+  display: block;
+}
+
+.puzz-piece-langs h3 {
+  margin: 0 0 0.3em;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #c084fc;
+}
+
+.puzz-piece-langs .puzz-subtitle {
+  margin: 0 0 1em;
+  font-size: 1rem;
+  color: rgba(255,255,255,0.6);
+}
+
+.puzz-description p       { margin: 0 0 1em; line-height: 1.6; }
+.puzz-description ul      { margin: 0 0 1em; padding-left: 1.5em; }
+.puzz-description li      { margin-bottom: 0.35em; }
+.puzz-description strong  { color: #fff; font-weight: 700; }
+.puzz-description a       { color: #a78bfa; text-underline-offset: 3px; }
+.puzz-description a:hover { color: #c4b5fd; }
+
+[data-role="meta"] {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 4em 1.5em 0;
+  color: #fff;
+  font-family: sans-serif;
+}
+
+[data-role="meta"] h1 {
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  margin: 0 0 0.3em;
+}
+
+[data-role="meta"] .puzz-subtitle {
+  color: rgba(255,255,255,0.6);
+  margin: 0 0 0.6em;
+}
+
+[data-role="meta"] .puzz-tagline {
+  color: rgba(255,255,255,0.85);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+[data-role="meta"] .puzz-completion {
+  display: none; /* only ever needed by JS after completion; never shown in the static page */
+}
+
+.puzz-content-dissolving {
+  transition: opacity 0.6s ease, transform 0.6s ease, filter 0.6s ease;
+  opacity: 0;
+  transform: scale(0.98);
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.puzz-content-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
